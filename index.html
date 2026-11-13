@@ -481,7 +481,7 @@ const ENEMIES = {
   brood_guardian:{n:'Brood Guardian', i:'🕷️', L:5, hp:1.3, atk:1, def:1.5, xp:1.6, ab:[{t:'poison',ch:.3,dmg:4,tr:3}], drops:[['antidote',.4],['potion_heal',.3]], d:'Eight legs, one job: guarding something you really should leave alone.'},
   // F1 bosses
   hoarder:    {n:'The Hoarder', i:'🧟‍♀️', L:6, hp:4.2, atk:1.1, def:1.2, xp:6, gold:6, boss:1, nb:1, ab:[{t:'summon',ch:.35,e:'roach',max:3},{t:'poison',ch:.3,dmg:5,tr:3}], drops:[['hoarder_locket',1]], d:'Neighborhood Boss. Swollen, wounded, and furious, surrounded by mountains of junk. When she retches, cockroaches pour out.'},
-  steam_juggernaut:{n:'Goblin Steam Juggernaut', i:'🚂', L:6, hp:3.8, atk:1.25, def:2.4, xp:5.5, gold:5, boss:1, nb:1, tags:['goblin'], ab:[{t:'bomb',ch:.3,mult:1.8},{t:'burn',ch:.2,dmg:5,tr:2}], drops:[['gunpowder',1],['dynamite',1],['goblin_mail',.6]], d:'Neighborhood Boss. A steam-powered war machine driven by three goblins standing on each other\'s shoulders.'},
+  steam_juggernaut:{n:'Goblin Steam Juggernaut', i:'🚂', L:6, hp:3.4, atk:1.1, def:2.2, xp:5.5, gold:5, boss:1, nb:1, tags:['goblin'], ab:[{t:'bomb',ch:.2,mult:1.6},{t:'burn',ch:.2,dmg:5,tr:2}], drops:[['gunpowder',1],['dynamite',1],['goblin_mail',.6]], d:'Neighborhood Boss. A steam-powered war machine driven by three goblins standing on each other\'s shoulders.'},
   warlord:    {n:'Goblin Warlord Grumtusk', i:'🪓', L:6, hp:2.8, atk:.95, def:1.4, xp:8, gold:7, boss:1, guardian:1, tags:['goblin'], ab:[{t:'heavy',ch:.25,mult:1.9},{t:'enrage'}], drops:[['fire_axe',1]], d:'Floor Guardian. A giant goblin with a huge battle axe. Somewhere, boss music is playing.'},
   // ===== Floor 2
   kobold:     {n:'Kobold', i:'🦎', L:5, hp:.6, atk:.65, dex:1.2, xp:1, drops:[['kobold_spear',.04],['herb',.2]], d:'Yappy little lizard folk with sharp sticks and sharper opinions.'},
@@ -766,7 +766,7 @@ function boomMult(){ return (1 + 0.35*(Math.max(1,S.floor)-1)) * (1 + (gearStat(
 function priceMult(){ return Math.max(0.55, 1 - stat('cha')*0.012 - (hasPassive('manager')?0.15:0)); }
 function floorPrice(){ return 1 + 0.45*(Math.max(1,S.floor)-1); }
 function buyPrice(id){ return Math.max(1, Math.round(ITEMS[id].v * floorPrice() * priceMult())); }
-function sellPrice(id){ return Math.max(1, Math.round(ITEMS[id].v * 0.4 * floorPrice())); }
+function sellPrice(id){ const crafted = RECIPES.some(r=>r.out===id); return Math.max(1, Math.round(ITEMS[id].v * (crafted?0.15:0.4) * floorPrice())); }
 function chaBonus(){ return hasPassive('manager') ? 4 : 0; }
 function checkChance(k, dc, bonus=0){ // d20 + stat (+bonus) >= dc
   const need = dc - stat(k) - bonus - (k==='cha'?chaBonus():0); return clamp((21-need)/20, 0.05, 0.95);
@@ -910,7 +910,7 @@ function useItem(id){
   if (fx.mp){ const b=S.mp; S.mp=Math.min(maxMP(), S.mp+fx.mp); msg.push(`+${S.mp-b} MP`); }
   if (fx.mpPct){ const b=S.mp; S.mp=Math.min(maxMP(), S.mp+Math.round(maxMP()*fx.mpPct/100)); msg.push(`+${S.mp-b} MP`); }
   if (fx.cure){ if(inC){ delete S.combat.pst.poison; delete S.combat.pst.burn; delete S.combat.pst.confuse; } msg.push('cured'); }
-  if (fx.buff){ if(inC){ for(const [k,v] of Object.entries(fx.buff)) S.combat.buff[k]=(S.combat.buff[k]||0)+v; } else { S.nextBuff = Object.assign({}, fx.buff); } msg.push(Object.entries(fx.buff).map(([k,v])=>`${v>0?'+':''}${v} ${k.toUpperCase()}`).join(', ')+(inC?'':' next fight')); }
+  if (fx.buff){ if(inC){ for(const [k,v] of Object.entries(fx.buff)) S.combat.buff[k]=(S.combat.buff[k]||0)+v; } else { S.nextBuff = S.nextBuff || {}; for(const [k,v] of Object.entries(fx.buff)) S.nextBuff[k]=(S.nextBuff[k]||0)+v; } msg.push(Object.entries(fx.buff).map(([k,v])=>`${v>0?'+':''}${v} ${k.toUpperCase()}`).join(', ')+(inC?'':' next fight')); }
   if (fx.perm){ for(const [k,v] of Object.entries(fx.perm)) S.base[k]+=v; msg.push(Object.entries(fx.perm).map(([k,v])=>`permanent +${v} ${k.toUpperCase()}`).join(', ')); }
   if (fx.floorBuff){ for(const [k,v] of Object.entries(fx.floorBuff)) S.floorBuff[k]=(S.floorBuff[k]||0)+v; msg.push(Object.entries(fx.floorBuff).map(([k,v])=>`+${v} ${k.toUpperCase()} this floor`).join(', ')); }
   if (fx.heal || fx.healPct){ S.st.heals++; if(S.st.heals>=10) unlock('potions_10'); }
@@ -1173,7 +1173,7 @@ function killEnemy(e, lastHit, o){
 }
 
 function hitPlayer(e, mult=1, o={}){
-  const c = S.combat;
+  const c = S.combat; if (e.dead) return;
   if (c.pst.trap){ c.pst.trap = 0; const d = Math.round(stat('int')*3 + stat('str')*2); clog(`${e.n} springs your BOOBY TRAP!`, 'c-crit'); sfx('boom'); dmgEnemy(e, d, {kind:'boom', label:'The trap', verb:'blasts'}); return; }
   // pet intercept
   if (S.pet && S.pet.hp>0 && !o.noPet && chance(0.22)){
@@ -1220,7 +1220,7 @@ function enemyAct(e){
   let mult=1, hits=1;
   const multi = ab.find(a=>a.t==='multi'); if (multi){ hits=multi.hits; mult = hits===2?0.62:0.42; }
   const heavy = ab.find(a=>a.t==='heavy'); if (heavy && chance(heavy.ch)){ mult*=heavy.mult; hits=1; clog(`${e.n} winds up a massive blow!`, 'c-e'); }
-  for (let h=0; h<hits && S.hp>0; h++) hitPlayer(e, mult);
+  for (let h=0; h<hits && S.hp>0 && !e.dead; h++) hitPlayer(e, mult);
 }
 function enemyPhase(){ for (const e of [...S.combat.en]){ if (S.hp<=0) break; enemyAct(e); } }
 function endOfRound(){
@@ -1306,7 +1306,7 @@ function useSkill(id){
   const c=S.combat, sk=SKILLS[id]; if(!sk || sk.kind==='passive') return false;
   if ((c.cd[id]||0)>0){ toast('SYSTEM',`${esc(sk.n)} is recharging.`); return false; }
   if (S.mp < (sk.mp||0)){ toast('SYSTEM','Not enough MP.','bad'); return false; }
-  S.mp -= sk.mp||0; if (sk.cd) c.cd[id]=sk.cd;
+  S.mp -= sk.mp||0; if (sk.cd) c.cd[id]=sk.cd+1;
   const e = currentTarget(); const L=S.lvl; const I=stat('int');
   switch(id){
     case 'stomp': { const d=(2+stat('str')*2.2)*(1+gearStat('stomp')/100); const done=dmgEnemy(e, d, {kind:'melee', canMiss:true, canCrit:true, skill:'stomp', verb:'stomp on'}); if(done && !e.dead && chance(.25)){ e.stun=1; clog(`${e.n} is stunned!`,'c-sys'); } break; }
@@ -1333,7 +1333,7 @@ function combatWon(){
   for (const id of c.rw.items) addItem(id, 1);
   if (S.hp>0 && S.hp < maxHP()*0.10) unlock('nailbiter');
   if (S.pet && S.pet.hp<=0) S.pet.hp = Math.round(petMaxHP()*0.25);
-  S.time -= 1;
+  if (!['guardian','castle','notut'].includes(c.onWin.t)) S.time -= 1;
   log(`Victory! +${xp} XP, +${gold} gold.`, 'l-good');
   sfx('win'); checkTop10();
   render();
@@ -1343,6 +1343,7 @@ function combatFled(smoke){
   S.st.flees++; if (S.st.flees>=5) unlock('coward');
   log(smoke?'You vanish in a cloud of smoke.':'You run for your life! '+pick(AI_QUIPS.flee), 'l-sys');
   S.combat = null; S.time -= 1;
+  if (S.pet && S.pet.hp<=0) S.pet.hp = Math.round(petMaxHP()*0.25);
   if (S.prev!==S.pos){ S.pos = S.prev; }
   go('explore');
 }
@@ -1391,6 +1392,7 @@ function finishCombat(){
       go('event',{id:'castle_taken', region:w.region}); break;
     }
     case 'event': go('event', Object.assign({}, w.args||{}, {id:w.id, step:w.step})); break;
+    case 'none': go('explore'); break;
     default: r.done=1; go('explore');
   }
 }
@@ -1424,8 +1426,20 @@ function timeCheck(){
   const t = S.time;
   for (const th of [24,12,3]){ if (t<=th && !S.ff['warn'+th]){ S.ff['warn'+th]=1; toast('SYSTEM', `Attention crawlers: this floor collapses in <b>${th} hours</b>. Find a stairwell. Or don't! It's your funeral. Literally.`, 'bad'); } }
   if (t<=0){ die('collapse', `The floor collapsed around you. You were ${S.map.rooms[S.pos].type==='stairs'?'standing right next to the stairs, which is somehow worse':'nowhere near the stairs'}.`); return true; }
+  const day = Math.floor((FLOORS[S.floor].hours - t) / 24);
+  if (day > (S.ff.day||0) && t > 24){ S.ff.day = day; toast('SYSTEM ANNOUNCEMENT', pick(DAILY_AI)()); }
   return false;
 }
+function crawlersLeft(){ const f = Math.max(1,S.floor) - 1 + floorProgress(); return Math.round(9.1e6 * Math.pow(0.42, f) / 1000) * 1000; }
+const DAILY_AI = [
+  () => `Good morning, crawlers! Another day down. Crawlers remaining: <b>${crawlersLeft().toLocaleString()}</b>. That number only goes one direction!`,
+  () => `Reminder: loot boxes only open in safe rooms. Crawlers who die holding unopened boxes are, frankly, hilarious.`,
+  () => `Today's most popular crawler is <b>${esc(leaderboard()[0].n)}</b>. Today's least popular crawler is somebody else. Could be you!`,
+  () => `Fun fact: the stairwell is somewhere on this floor. That's the fact. That's all you get.`,
+  () => `The sponsors are getting restless. Do something interesting. Preferably something on fire.`,
+  () => `Time remaining on this floor: <b>${fmtTime(S.time)}</b>. Do the math. We did. It's grim.`,
+  () => `A friendly reminder that the System is not responsible for injuries, deaths, or emotional damage sustained while crawling.`,
+];
 function spawnFor(r){
   const F = FLOORS[S.floor];
   if (S.floor===5){ const reg = r.region || pick(['land','sea','air','sub']); return buildGroup(wpick(F.regionSpawns[reg]).map(x=>x.slice()), 0); }
@@ -1461,12 +1475,13 @@ function enterRoom(){
 }
 
 /* ---------------------------- saving ---------------------------- */
-function save(){ if (!S || S.dead) return; store.set(CFG.saveKey, S); }
+function save(){ if (!S || S.dead || S.won) return; store.set(CFG.saveKey, S); }
 function checkpoint(){ if (!S || S.dead) return; store.set(CFG.ckptKey, S); }
 function loadGame(key=CFG.saveKey){
   const s = store.get(key); if (!s) return false;
   S = s; S.dead = null;
-  if (S.combat && S.combat.over) { S.combat = null; if (S.scene==='combat') S.scene='explore'; }
+  if (S.combat && S.combat.over && S.combat.result!=='win') { S.combat = null; if (S.scene==='combat') S.scene='explore'; }
+  if (S.combat) UID = Math.max(UID, ...S.combat.en.map(e=>e.uid||0)) + 1;
   if (S.floor) document.documentElement.style.setProperty('--floor-accent', FLOORS[S.floor].accent);
   render(); return true;
 }
@@ -1622,15 +1637,17 @@ SCENES.explore = {
     // exits
     const ex = [0,1,2,3].filter(d=>r.d[d]).map(d=>DIRS[d][2]);
     html += P(`<span class="muted">Exits: ${ex.join(', ')}.</span>`);
-    if (!r.srch) choices.push(C('Search the room', searchRoom, {sub:`1 hour · might find supplies`}));
-    choices.push(C('Make camp and rest', camp, {sub:`6 hours · recover half your HP & MP · risky`}));
+    if (!['safe','guild'].includes(r.type)){
+      choices.push(C('Search the room', r.srch ? null : searchRoom, {sub: r.srch ? 'Already searched' : `1 hour · might find supplies`, disabled: !!r.srch}));
+      choices.push(C('Make camp and rest', camp, {sub:`6 hours · recover half your HP & MP · risky`}));
+    }
     return { kicker:`${F.name} · ${fmtTime(S.time)} left`, title:r.nm, art: r.type==='stairs'?'🪜':r.type==='safe'?'🛋️':r.type==='guild'?'📚':r.type==='platform'?'🚉':r.type==='castle'?'🏰':F.icon, html, choices, dpad:true };
   }
 };
 function searchRoom(){
   const r = room(); r.srch = 1; S.time -= 1;
   if (timeCheck()) return;
-  if (chance(0.10)) return startCombat(spawnFor(r), {intro:'You disturbed something while searching!'});
+  if (chance(0.10)) return startCombat(spawnFor(r), {intro:'You disturbed something while searching!', onWin:{t:'none'}});
   const roll = Math.random();
   if (roll < 0.45){ const id = pick(['rag','gunpowder','herb','nails','jug','herb','rag','water','snacks','candy','booze']); addItem(id); toast('SEARCH', `You found ${ITEMS[id].i} <b>${esc(ITEMS[id].n)}</b>.`, 'loot'); }
   else if (roll < 0.62){ const g = addGold(rand(3,10)*S.floor); log(`Found ${g} gold.`, 'l-loot'); toast('SEARCH', `You found 🪙 <b>${g} gold</b>.`, 'loot'); }
@@ -1640,7 +1657,7 @@ function searchRoom(){
 }
 function camp(){
   S.time -= 6; if (timeCheck()) return;
-  if (chance(0.3)){ return startCombat(spawnFor(room()), {intro:'You wake up to something chewing on your boot. AMBUSH!', ambush:true}); }
+  if (chance(0.3)){ return startCombat(spawnFor(room()), {intro:'You wake up to something chewing on your boot. AMBUSH!', ambush:true, onWin:{t:'none'}}); }
   healP(maxHP()*0.5, true); S.mp = Math.min(maxMP(), S.mp + Math.round(maxMP()*0.5)); if (S.pet) S.pet.hp = petMaxHP();
   log('You camp for six hours. Nothing eats you.', 'l-good'); toast('CAMP','You rest for 6 hours. Nothing eats you. This time.');
   render();
@@ -1690,7 +1707,7 @@ SCENES.guild = {
     const nb = S.boxes.length;
     return { kicker:'Guild Hall · Safe Zone', title:"Mordecai's Guild", art:'🐀',
       html: P(S.floor===1 ? "Mordecai, your game guide, is a rat-like man with tired eyes and a lab coat full of burn holes. He used to be a crawler. Now he works here, forever, helping people like you not die. He takes the job more seriously than he lets on."
-        : `Mordecai looks up from a bubbling potion. "${esc(S.name)}. Still alive. Good. ${pick(['Sit. Don\'t touch anything.','You smell terrible. Sit down.','The audience likes you. That\'s dangerous. Sit.'])}"`) +
+        : `Mordecai looks up from a bubbling potion. "${esc(S.name)}. Still alive. Good. ${a.greet || (a.greet = pick(['Sit. Don\'t touch anything.','You smell terrible. Sit down.','The audience likes you. That\'s dangerous. Sit.']))}"`) +
         (a.tip ? P(`<span class="say">${esc(a.tip)}</span>`) : ''),
       choices:[
         C('Training (learn skills for gold)', ()=>openModal('train')),
@@ -1834,13 +1851,13 @@ const SPONSORS = ['Lord Zxyrr of the Eighth Spiral','The Hrothgrar Shipping Conc
 const EVENTS = {};
 
 EVENTS.monster = {
-  enter(a){ if (!a.group){ const r=room(); a.group = r.type==='elite' || a.elite ? buildGroup(wpick(FLOORS[S.floor].spawns.length?FLOORS[S.floor].spawns:FLOORS[S.floor].regionSpawns[r.region||'land']), 1).concat(spawnFor(r).slice(0,1)) : spawnFor(r); } },
+  enter(a){ if (!a.group){ const r=room(); if (!r.group) r.group = r.type==='elite' || a.elite ? buildGroup(wpick(FLOORS[S.floor].spawns.length?FLOORS[S.floor].spawns:FLOORS[S.floor].regionSpawns[r.region||'land']), 1).concat(spawnFor(r).slice(0,1)) : spawnFor(r); a.group = JSON.parse(JSON.stringify(r.group)); a.group.forEach(e=>e.uid=UID++); a.title = pick(['Monsters!','Company','Hostiles Ahead','Uh-Oh']); } },
   view(a){
     const names = {}; for (const e of a.group) names[e.n] = (names[e.n]||0)+1;
     const list = Object.entries(names).map(([n,k])=>`<b>${k>1?k+'× ':''}${esc(n)}</b>`).join(', ');
     const lv = a.group.map(e=>e.L); const lvl = Math.min(...lv)===Math.max(...lv) ? `level ${lv[0]}` : `levels ${Math.min(...lv)}–${Math.max(...lv)}`;
     const first = ENEMIES[a.group[0].id];
-    return { kicker: a.elite ? 'Dangerous Encounter' : 'Encounter', title: a.elite ? 'Something Nasty' : pick(['Monsters!','Company','Hostiles Ahead','Uh-Oh']), art:a.group[0].i,
+    return { kicker: a.elite ? 'Dangerous Encounter' : 'Encounter', title: a.elite ? 'Something Nasty' : (a.title||'Monsters!'), art:a.group[0].i,
       html: P(`You run into ${list} (${lvl}).`, `<span class="muted">${esc(first.d)}</span>`) + (a.elite?P('<span class="bad">This group looks tougher than usual.</span>'):''),
       choices:[ C('Fight!', ()=>startCombat(a.group, {onWin:{t:'room'}}), {cls:'danger'}), C('Back away', back, {sub:'Return the way you came. They stay here.'}) ] };
   }
@@ -1919,7 +1936,7 @@ EVENTS.lured = { view(){ return { kicker:'Experience Denied', title:'Bye-Bye, Ra
   choices:[ C('Continue', ()=>go('explore'), {cls:'primary'}) ] }; } };
 
 EVENTS.treasure = {
-  enter(a){ if (a.kind) return; a.kind = pick(['a battered treasure chest','a heap of abandoned gear','a sealed supply crate','a dropped duffel bag']); a.mimic = chance(0.13); },
+  enter(a){ if (a.kind) return; const r=room(); if (r.mimic===undefined) r.mimic = chance(0.13); a.kind = pick(['a battered treasure chest','a heap of abandoned gear','a sealed supply crate','a dropped duffel bag']); a.mimic = r.mimic; },
   view(a){
     if (a.res) return resultView(a,'Loot!','💰');
     const openIt = (first) => {
@@ -2014,7 +2031,7 @@ EVENTS.npc_meadowlark = {
     return { kicker:'Other Crawlers', title:'Team Meadow Lark', art:'👵',
       html: P('A group of elderly crawlers from the Meadow Lark retirement home has been pinned down behind an overturned bus by a pack of kobolds. A maintenance worker in coveralls is swinging a wrench. A woman in a nightgown is throwing dentures.'),
       choices:[
-        C('Help them!', ()=>{ S.flags.meadowlark=1; unlock('meadowlark'); startCombat(buildGroup([['kobold',2,2],['kobold_shaman',1,1]]), {onWin:{t:'event', id:'npc_meadowlark', step:'won'}, intro:'You charge in!'}); }, {cls:'danger'}),
+        C('Help them!', ()=>{ startCombat(buildGroup([['kobold',2,2],['kobold_shaman',1,1]]), {onWin:{t:'event', id:'npc_meadowlark', step:'won'}, intro:'You charge in!'}); }, {cls:'danger'}),
         healCount>=2 ? C('Share your supplies (2 healing items)', ()=>{ let n=2; for(const i of heals){ while(n>0&&hasItem(i)){ takeItem(i); n--; } } S.flags.meadowlark=1; unlock('meadowlark'); a.res=P('You toss them some supplies. They patch themselves up and drive off the kobolds with renewed vigor. "We owe you one," says the maintenance man.', '<span class="good">Team Meadow Lark will help you at the stairwell.</span>'); render(); }) : null,
         C('Keep moving', ()=>{ S.flags.meadowlark=-1; done(); }),
       ].filter(Boolean) };
@@ -2022,13 +2039,13 @@ EVENTS.npc_meadowlark = {
 };
 // finishCombat for npc_meadowlark 'won' gives rewards on enter
 const _mlEnter = EVENTS.npc_meadowlark.enter;
-EVENTS.npc_meadowlark.enter = (a) => { if (a.step==='won' && !a.paid){ a.paid=1; addItem('potion_heal',2); addItem('nails'); addItem('gunpowder'); return; } _mlEnter(a); };
+EVENTS.npc_meadowlark.enter = (a) => { if (a.step==='won' && !a.paid){ a.paid=1; S.flags.meadowlark=1; unlock('meadowlark'); addItem('potion_heal',2); addItem('nails'); addItem('gunpowder'); return; } _mlEnter(a); };
 
 EVENTS.npc_frankmaggie = {
   enter(a){ if (S.flags.pk && !a.step){ a.id='treasure'; EVENTS.treasure.enter(a); } },
   view(a){
     if (a.step==='won'){ return { kicker:'Player Killers', title:'Karma', art:'⚖️', html: P('Frank Q and Maggie My lie still. In their packs you find the belongings of a lot of other crawlers. You decide not to think about that too hard.'), choices:[cont()] }; }
-    const fight = (amb) => { S.flags.pk=1; startCombat(['frank','maggie'], {onWin:{t:'event', id:'npc_frankmaggie', step:'won'}, ambush:amb, intro: amb?'Maggie\'s smile drops. The knives come out.':'You strike first.'}); };
+    const fight = (amb) => { startCombat(['frank','maggie'], {onWin:{t:'event', id:'npc_frankmaggie', step:'won'}, ambush:amb, intro: amb?'Maggie\'s smile drops. The knives come out.':'You strike first.'}); };
     if (a.spotted) return { kicker:'Player Killers', title:'Not So Friendly', art:'🔪',
       html: P('You notice the blood on Maggie\'s sleeve, the way Frank keeps his hand behind his back, and the pile of crawler backpacks behind the fire. These two are player killers.'),
       choices:[ C('Attack first', ()=>fight(false), {cls:'danger'}), C('Walk away', ()=>{ S.flags.pk=1; done(); }) ] };
@@ -2042,13 +2059,13 @@ EVENTS.npc_frankmaggie = {
   }
 };
 const _fmEnter = EVENTS.npc_frankmaggie.enter;
-EVENTS.npc_frankmaggie.enter = (a) => { if (a.step==='won' && !a.paid){ a.paid=1; unlock('pk_killer'); addGold(rand(60,120)); addItem('potion_heal',2); return; } _fmEnter(a); };
+EVENTS.npc_frankmaggie.enter = (a) => { if (a.step==='won' && !a.paid){ a.paid=1; S.flags.pk=1; unlock('pk_killer'); addGold(rand(60,120)); addItem('potion_heal',2); return; } _fmEnter(a); };
 
 EVENTS.maestro = {
-  enter(a){ if (S.flags.maestro && !a.step){ a.id='treasure'; EVENTS.treasure.enter(a); return; } if (!a.doors) a.doors = shuffle(['prize','monster','trap']); if (a.step==='won' && !a.paid){ a.paid=1; unlock('maestro'); giveBox(1,'Fan','from Prince Maestro\'s producers'); } },
+  enter(a){ if (S.flags.maestro && !a.step){ a.id='treasure'; EVENTS.treasure.enter(a); return; } if (!a.doors) a.doors = shuffle(['prize','monster','trap']); if (a.step==='won' && !a.paid){ a.paid=1; S.flags.maestro=1; unlock('maestro'); giveBox(1,'Fan','from Prince Maestro\'s producers'); } },
   view(a){
     if (a.step==='won' || a.res) return { kicker:'Death Watch Extreme!', title:'That\'s a Wrap!', art:'📺', html: a.res || P('"WHAT A FINISH!" Prince Maestro howls into his microphone. "Give it up for our CONTESTANT!" The audience screams. Confetti falls. Some of it is on fire.'), choices:[cont()] };
-    const pickDoor = (k) => () => { S.flags.maestro=1; const o=a.doors[k];
+    const pickDoor = (k) => () => { const o=a.doors[k]; if (o!=='monster') S.flags.maestro=1;
       if (o==='prize'){ unlock('maestro'); giveBox(2,'Fan','— GRAND PRIZE!'); const g=addGold(rand(40,80)); const v=addViews(5000*2.6); a.res=P(`Door number ${k+1} slides open to a shower of glitter. "A WINNER!" You win a Gold Fan Box and ${g} gold!`, `<span class="good">+${fmt(v)} viewers</span>`); render(); }
       if (o==='monster'){ startCombat(buildGroup([['gnoll',2,2]],1), {onWin:{t:'event', id:'maestro', step:'won', args:{doors:a.doors}}, intro:`Door number ${k+1} opens. Two snarling gnolls in sequined vests charge out. "OHHH, BAD LUCK!"`}); }
       if (o==='trap'){ const d=Math.min(S.hp-1, Math.round(maxHP()*0.25)); S.hp-=d; sfx('hurt'); unlock('maestro'); const v=addViews(4000*2.6); a.res=P(`Door number ${k+1} opens onto a giant spring-loaded boxing glove. It hits you square in the chest.`, `<span class="bad">-${d} HP</span> · <span class="good">+${fmt(v)} viewers (it was very funny)</span>`); render(); }
@@ -2056,7 +2073,7 @@ EVENTS.maestro = {
     return { kicker:'Death Watch Extreme!', title:'Prince Maestro\'s Game Show', art:'📺',
       html: P('Spotlights snap on. You are suddenly standing on a glittering stage. An orc in a sequined suit, Prince Maestro, beams at you with far too many teeth.', '"WELCOME, CONTESTANT, to DEATH WATCH EXTREME! Behind one door: a FABULOUS PRIZE! Behind the others: DEATH! Probably! Pick a door!"'),
       choices:[ C('Door Number 1', pickDoor(0)), C('Door Number 2', pickDoor(1)), C('Door Number 3', pickDoor(2)),
-        C('"I don\'t want to play."', ()=>{ S.flags.maestro=1; startCombat(buildGroup([['gnoll',1,1]],1), {onWin:{t:'event', id:'maestro', step:'won', args:{doors:a.doors}}, intro:'"Refusal is not an OPTION!" Maestro snaps his fingers. A gnoll is released.'}); }, {cls:'danger'}) ] };
+        C('"I don\'t want to play."', ()=>{ startCombat(buildGroup([['gnoll',1,1]],1), {onWin:{t:'event', id:'maestro', step:'won', args:{doors:a.doors}}, intro:'"Refusal is not an OPTION!" Maestro snaps his fingers. A gnoll is released.'}); }, {cls:'danger'}) ] };
   }
 };
 EVENTS.vending = { view(a){
@@ -2197,6 +2214,7 @@ function render(){
   if (!story){ renderChar(); renderMap(); renderLog(); }
   renderScene();
   if (UIX.modal) renderModal();
+  save();
 }
 function renderTop(){
   $('#tb-name').textContent = S && S.name ? S.name.toUpperCase() : '???';
@@ -2384,7 +2402,7 @@ function renderModal(){
   else if (k==='lb'){
     const lb = leaderboard(); const me = lb.findIndex(r=>r.me);
     const rows = lb.slice(0,10).map((r,i)=>`<tr class="${r.me?'me':''}"><td>#${i+1}</td><td>${esc(r.n)}</td><td>${r.s.toLocaleString()}</td></tr>`).join('') + (me>=10?`<tr><td colspan="3" class="small">...</td></tr><tr class="me"><td>#${me+1}</td><td>${esc(S.name)}</td><td>${lb[me].s.toLocaleString()}</td></tr>`:'');
-    h = box('📈 Top Ten Leaderboard', 'Live from the World Dungeon. Score is based on XP, kills, bosses, viewers and depth.', `<table class="lb"><tr><th>Rank</th><th>Crawler</th><th>Score</th></tr>${rows}</table><p class="small">Top ten crawlers get their faces on every screen in the dungeon. Also, bounties.</p>`);
+    h = box('📈 Top Ten Leaderboard', 'Live from the World Dungeon. Score is based on XP, kills, bosses, viewers and depth.', `<table class="lb"><tr><th>Rank</th><th>Crawler</th><th>Score</th></tr>${rows}</table><p class="small">Crawlers remaining: <b>${crawlersLeft().toLocaleString()}</b>. Top ten crawlers get their faces on every screen in the dungeon. Also, bounties.</p>`);
   }
   else if (k==='shop'){
     const where = UIX.modalArg;
@@ -2412,10 +2430,9 @@ function renderModal(){
       <button class="choice" data-menu="sound"><span class="ct">${META.sound?'🔊 Sound: ON':'🔇 Sound: OFF'}</span></button>
       <button class="choice" data-menu="help"><span class="ct">❓ How to play</span></button>
       <button class="choice" data-menu="endings"><span class="ct">🏁 Endings gallery (${Object.keys(META.endings).length}/${Object.keys(ENDINGS).length})</span></button>
-      ${S && S.floor && store.get(CFG.ckptKey) && S.scene!=='combat' ? '<button class="choice" data-menu="ckpt"><span class="ct">⏪ Load last checkpoint</span></button>' : ''}
       ${S ? '<button class="choice danger" data-menu="new"><span class="ct">🆕 Abandon this run and start over</span></button>' : ''}
       ${S ? '<button class="choice" data-menu="title"><span class="ct">🏠 Save & return to title</span></button>' : ''}
-    </div><p class="small" style="margin-top:12px">Progress autosaves after every scene. Checkpoints are made at safe rooms, guilds and the start of each floor.</p>`);
+    </div><p class="small" style="margin-top:12px">Progress autosaves constantly. If you die, you can return to your last checkpoint (safe rooms, guilds and the start of each floor).</p>`);
   }
   else if (k==='help'){
     h = box('❓ How to Play', '', `<div class="scene-text" style="font-size:15px">
@@ -2490,6 +2507,7 @@ document.addEventListener('keydown', (ev)=>{
   if (ev.target.tagName==='INPUT'){ if (ev.key==='Enter'){ const c=UIX.choices[0]; if(c&&c.act) c.act(); } return; }
   if (ev.key==='Escape'){ if (UIX.modal) closeModal(); return; }
   if (UIX.modal) return;
+  if (ev.repeat) return;
   if (/^[1-9]$/.test(ev.key)){ const c=UIX.choices[+ev.key-1]; if (c && c.act && !c.disabled){ sfx('click'); c.act(); } return; }
   if (!S) return;
   const k = ev.key.toLowerCase();
