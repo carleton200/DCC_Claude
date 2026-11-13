@@ -1,0 +1,337 @@
+:: StoryTitle
+DCC
+
+
+:: StoryData
+{
+  "ifid": "75E9DFA1-99A5-45F7-8168-5F1D09B9E008",
+  "format": "Harlowe",
+  "format-version": "3.3.9",
+  "start": "Name",
+  "zoom": 1
+}
+
+
+:: Accept that he is right and I will not survive. Sit here and wait {"position":"825,950","size":"100,100"}
+{(if: (history:) contains "a machete") [
+<div class = "photos">
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = "50px" height = "50px"/>
+</div>
+] (else:)[
+<div class = "photos" style = "display: flex; gap: 5px">
+<img src="https://www.gosupps.com/media/catalog/product/8/1/81pguFaQJVL.jpg" width = "50px" height = "50px"/>
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmo59ohI7oLnTZ4bc-ZMInfriacEu-d39Oj3tAQhIR4g&s=10" width = "50px" height = "50px"/>
+</div>
+]
+(set: $hp to 0)
+<c class="smallCap">HP: $hp</c>
+}
+(if: (history:) contains "a machete") [
+    You're so hungry... You try to eat the machete but your teeth can't get through it. Your final days are long and miserable as you wait for the dungeon floor to end. Finally, the dungeon moves on without you, and your section disappears with you in it. The end is slow and terrible until a brief instant and everything is gone. 
+    If only you were more fun and actually tried to continue...
+]
+(else:)[
+	You sit waiting for days. Glad you brought a bag full of food with you, you have plenty to eat and can relax until the end of the floor. Eventually the dungeon moves on without you, and your section disappears with you in it. The end is peaceful and instant.
+]
+<audio src = "https://cdn.freesound.org/previews/841/841370_18320024-lq.mp3" autoplay />
+(enchant: ?page, (background:red))
+
+
+:: Attack them! They're just little goblins! {"position":"1150,675","size":"100,100"}
+{(if: (history:) contains "a machete") [
+<div class = "photos">
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = "50px" height = "50px"/>
+</div>
+] (else:)[
+<div class = "photos" style = "display: flex; gap: 5px">
+<img src="https://www.gosupps.com/media/catalog/product/8/1/81pguFaQJVL.jpg" width = "50px" height = "50px"/>
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmo59ohI7oLnTZ4bc-ZMInfriacEu-d39Oj3tAQhIR4g&s=10" width = "50px" height = "50px"/>
+</div>
+]
+}
+(set: $hp to $hp - 25)
+(if: $hp is 0)[
+	<c class="smallCap">HP: $hp</c>
+	While they were easy to defeat the first time, the goblins have worn you down and took the last of your health. You died in a glorious battle against tiny little goblins because you could not just move on in the game.
+    <audio src = "https://cdn.freesound.org/previews/841/841370_18320024-lq.mp3" autoplay />
+(enchant: ?page, (background:red))
+] (else:)[
+(if: (history:) contains "a machete") [
+<c class="smallCap">HP: $hp</c>
+
+	You pull out the machete. It makes short work of the weak little goblins and their knives. You do take some damange though and lose 25 hp. There is not much loot though, and you're pretty gross now. (if: $randW is 0)[Your machete glows for a moment and then you see "Goblin Terror of $nameInp" engraved on it. Cool! ]
+ 
+[[Wander]]
+<audio src = "https://cdn.freesound.org/previews/843/843046_7395592-lq.mp3" autoplay />
+]
+(else:) [
+(set: $hp to 0)
+<c class="smallCap">HP: $hp</c>
+	Uhhh... 
+You don't have any weapons. You have a bag full of food. You are dead.
+<audio src = "https://cdn.freesound.org/previews/841/841370_18320024-lq.mp3" autoplay />
+(enchant: ?page, (background:red))
+]
+]
+
+
+:: Attempt to make a shelter in the woods {"position":"575,450","size":"100,100"}
+Really?!?? You live by the Amazonian jungle and it is the middle of the night! You got eaten.
+<div class = "mainImages">
+<img src="https://atmos.earth/wp-content/uploads/2023/04/amazon-rainforest-night-17-1280x960.jpg" width = "900px"></img>
+</div>
+<audio src = "https://cdn.freesound.org/previews/841/841370_18320024-lq.mp3" autoplay />
+(enchant: ?page, (background:red))
+
+
+:: Begin {"position":"700,325","size":"100,100"}
+(if: $nameInp is "")[
+ Okay, really?? I make this whole game and you can't even put in a name for it to use?? Go back and put anything at least...
+ [[Name]]
+] (else:)[
+	You can’t sleep and go for a nighttime walk. The world collapses around you, all buildings vanish into the ground as far as you can see. You do not see anybody else around.  A loud voice announces a chance to enter a dungeon at a hole in the ground nearby.  What do you do?
+<div class = "mainImages">
+<img src="https://1d3trees.com/static/40a3173efb04009de44b538f9f1457f4/8e1fc/inspiration.jpg"></img>
+</div>
+[[Sit down and cry]]
+[[Attempt to make a shelter in the woods]]
+[[Enter the dungeon]]
+<audio src = "https://cdn.freesound.org/previews/837/837848_10996917-lq.mp3" autoplay />
+]
+
+
+
+
+:: Enter Tutorial Guild {"position":"800,825","size":"100,100"}
+{(if: (history:) contains "a machete") [
+<div class = "photos">
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = "50px" height = "50px"/>
+</div>
+] (else:)[
+<div class = "photos" style = "display: flex; gap: 5px">
+<img src="https://www.gosupps.com/media/catalog/product/8/1/81pguFaQJVL.jpg" width = "50px" height = "50px"/>
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmo59ohI7oLnTZ4bc-ZMInfriacEu-d39Oj3tAQhIR4g&s=10" width = "50px" height = "50px"/>
+</div>
+]
+<c class="smallCap">HP: $hp</c>
+}
+You enter the room to see a big, angry preying mantis looking at you.
+"Hello... my name is $nameInp" you say.
+It starts speaking. It says it's name is Thrax, he is your guide, and that you are not going to survive.
+He activates something that changes your vision, allowing you to see information about all kinds of things around you as well as some sort of inventory system. You feel very overwhelmed.
+
+[[Accept that he is right and I will not survive. Sit here and wait]]
+[[Fight on with your new knowledge and ability]]
+<audio src = "https://cdn.freesound.org/previews/733/733465_15919059-lq.mp3" autoplay/>
+
+
+
+:: Enter the dungeon {"position":"825,450","size":"100,100"}
+$nameInp (that's you!!!) approaches the dungeon. As you enter, you think about how glad you are that you had brought a backpack full of ([[snacks, water, and candy]] OR [[a machete]]) with you on your walk.
+
+<div class = "mainImages">
+<img src="https://images.squarespace-cdn.com/content/v1/55662146e4b0bda793f9f9f0/1528908723340-CNZ3UXQWG16H98HMML76/2+Backpacks.jpg?format=2500w" width = "500px" >
+</div>
+(set: $hp to 100)
+(set: $randW to 0)
+<audio src = "https://cdn.freesound.org/previews/733/733465_15919059-lq.mp3" autoplay/>
+
+
+:: Fight on with your new knowledge and ability {"position":"700,950","size":"100,100"}
+{(if: (history:) contains "a machete") [
+<div class = "photos">
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = "50px" height = "50px"/>
+</div>
+] (else:)[
+<div class = "photos" style = "display: flex; gap: 5px">
+<img src="https://www.gosupps.com/media/catalog/product/8/1/81pguFaQJVL.jpg" width = "50px" height = "50px"/>
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmo59ohI7oLnTZ4bc-ZMInfriacEu-d39Oj3tAQhIR4g&s=10" width = "50px" height = "50px"/>
+</div>
+]
+<c class="smallCap">HP: $hp</c>
+}
+(if: (history:) contains "a machete")[
+	(if: (history:) contains "Attack them! They're just little goblins!")[
+    	The dungeon has shown you that you are daring and willing to fight to survive this new world. You fight day after day, forming a strong alliance with others that you meet and surviving all the way down to the 12th floor. Tired, with allies lost and a good exit deal, you survive by becoming a swordsmandship guild master for 30 seasons until you become free.
+        <audio src = "https://cdn.freesound.org/previews/353/353961_3312090-lq.mp3" autoplay />
+        (enchant: ?page, (background:green))
+    ] (else:)[
+    While you have kept pushing on, the dungeon has shown you to be weak and afraid of conflict. You survive for a few weeks by relying on other people, but your level begins to fall behind and you die to a vampire on the 6th dungeon floor.
+    <audio src = "https://cdn.freesound.org/previews/841/841370_18320024-lq.mp3" autoplay />
+    (enchant: ?page, (background:red))
+    ]
+]
+(else:)[
+	(if: (history:) contains "Ignore Tutorial Guild")[
+    The dungeon has shown you to be a coward. You hide from almost all conflict and experience. You do not improve fast enough for the increase in difficult over time. With all of your hiding, you fail to find the exit to the third dungeon floor before time runs out and are lost.
+    <audio src = "https://cdn.freesound.org/previews/841/841370_18320024-lq.mp3" autoplay />
+    (enchant: ?page, (background:red))
+    ]
+    (else:)[
+		While not very aggressive, the dungeon has shown you to be resourceful and push forward. You become a healer in a large group. They fight hard to defend you and you become very strong over time. Your entire group does very well with you keeping them alive. Most of you make it to the 10th floor before you all agree to take deals to get out. You become a game guide to help future dungeon crawlers for 150 seasons until you become free.
+        <audio src = "https://cdn.freesound.org/previews/353/353961_3312090-lq.mp3" autoplay />
+        (enchant: ?page, (background:green))
+    ]
+    
+]
+
+
+:: I hate tutorials and I am not doing it {"position":"1100,1075","size":"100,100"}
+(set: $hp to 0)
+<c class="smallCap">HP: $hp</c>
+You choose to never enter a tutorial guild. You keep wandering until you enter a room and suddenly the door slams behind you and you cannot move. Music starts blaring from speakers you cannot see. Something about a "Boss Battle" is announced from an unknown speaker. You look across the room to see a giant goblin with a huge battle axe staring you down.
+I don't think you're surviving this...
+<audio src = "https://cdn.freesound.org/previews/841/841370_18320024-lq.mp3" autoplay />
+(enchant: ?page, (background:red))
+
+
+:: Ignore Tutorial Guild {"position":"1150,875","size":"100,100"}
+{(if: (history:) contains "a machete") [
+<div class = "photos">
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = "50px" height = "50px"/>
+</div>
+] (else:)[
+<div class = "photos" style = "display: flex; gap: 5px">
+<img src="https://www.gosupps.com/media/catalog/product/8/1/81pguFaQJVL.jpg" width = "50px" height = "50px"/>
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmo59ohI7oLnTZ4bc-ZMInfriacEu-d39Oj3tAQhIR4g&s=10" width = "50px" height = "50px"/>
+</div>
+]
+<c class="smallCap">HP: $hp</c>
+}
+You run away from everything in fear. You occasionally encounter more goblins, and you decide to flee, seeing no benefit to fighting them. After hours of more walking, you encounter a tutorial guild again
+[[Enter Tutorial Guild]] 
+[[Run Away Again->Ignore Tutorial Guild]] 
+[[Explore More->Wander]]
+[[I hate tutorials and I am not doing it]]
+<audio src = "https://cdn.freesound.org/previews/733/733465_15919059-lq.mp3" autoplay/>
+
+
+:: Name {"position":"725,200","size":"100,100"}
+Welcome! What is your name? (input: bind $nameInp)
+
+[[Begin]]
+<audio src = "https://cdn.freesound.org/previews/477/477359_2402876-lq.mp3" autoplay />
+
+
+:: Run for your life {"position":"700,700","size":"100,100"}
+{(if: (history:) contains "a machete") [
+<div class = "photos">
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = "50px" height = "50px"/>
+</div>
+] (else:)[
+<div class = "photos" style = "display: flex; gap: 5px">
+<img src="https://www.gosupps.com/media/catalog/product/8/1/81pguFaQJVL.jpg" width = "50px" height = "50px"/>
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmo59ohI7oLnTZ4bc-ZMInfriacEu-d39Oj3tAQhIR4g&s=10" width = "50px" height = "50px"/>
+</div>
+]
+<c class="smallCap">HP: $hp</c>
+}
+The tiny little goblins could not keep up and you escaped. 
+[[Wander]]
+<audio src = "https://cdn.freesound.org/previews/733/733465_15919059-lq.mp3" autoplay/>
+
+
+:: Sit down and cry {"position":"700,450","size":"100,100"}
+Well that was boring. Aliens take you and you are frozen forever.
+<c class = "smallCap">(Good luck finding the back button)</c>
+<div class = "mainImages">
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdK8wBBnp50_VnG86Bpg-CJDOEwXZ6XHl7BcT-AR26zR7O55sfXbwQwf0f&s=10"/>
+</div>
+<p class = "centCap">($nameInp - Dead because they did nothing)</p>
+<audio src = "https://cdn.freesound.org/previews/841/841370_18320024-lq.mp3" autoplay />
+(enchant: ?page, (background:white))
+
+
+:: Wander {"position":"975,750","size":"100,100"}
+{(if: (history:) contains "a machete") [
+<div class = "photos">
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = "50px" height = "50px"/>
+</div>
+] (else:)[
+<div class = "photos" style = "display: flex; gap: 5px">
+<img src="https://www.gosupps.com/media/catalog/product/8/1/81pguFaQJVL.jpg" width = "50px" height = "50px"/>
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmo59ohI7oLnTZ4bc-ZMInfriacEu-d39Oj3tAQhIR4g&s=10" width = "50px" height = "50px"/>
+</div>
+]
+<c class="smallCap">HP: $hp</c>
+}
+(if: $randW % 2 is 0)[
+    You wander further around the dungeon. As you wander, you encounter ANOTHER horde of goblins with knives coming at you. (They look very similar too)
+
+<div style = "display: flex" >
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = 100px" />
+
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvZeQs4RjNSrChGzkFwIwQ2V3jssLnBxT0Yd6GbJHljw&s=10" width = "400px" />
+</div>
+(set: $randW to $randW + 1)
+[[Run for your life]]
+[[Attack them! They're just little goblins!]]
+<audio src = "https://cdn.freesound.org/previews/521/521417_10962806-lq.mp3" autoplay/>
+]
+(else:)[
+    You get back to walking. After a while longer of wandering, you encounter the tutorial guild entrance. 
+    (set: $randW to $randW + 1)
+[[Enter Tutorial Guild]]
+[[Expore More->Wander]]
+[[Run Away ->Ignore Tutorial Guild]]
+<audio src = "https://cdn.freesound.org/previews/733/733465_15919059-lq.mp3" autoplay/>
+]
+
+
+:: a machete {"position":"1050,525","size":"100,100"}
+<div class = "photos">
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Gz6564yXeSDDNWnZE7peuBN6OonyTd8yVHcohqishA&s=10" width = "50px" height = "50px"/>
+</div>
+<c class="smallCap">HP: $hp</c>
+You enter the dungeon and it explains you must beat 18 floors to escape. You must also find a tutorial guild to be able to progress. As you wander, you encounter a horde of goblins with knives coming at you. 
+
+<div class = "mainImages" style = "display: flex; gap : 10px" >
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvZeQs4RjNSrChGzkFwIwQ2V3jssLnBxT0Yd6GbJHljw&s=10" width = "400px" />
+</div>
+[[Run for your life]]
+[[Attack them! They're just little goblins!]]
+<audio src = "https://cdn.freesound.org/previews/521/521417_10962806-lq.mp3" autoplay/>
+
+
+:: snacks, water, and candy {"position":"825,575","size":"100,100"}
+<div class = "photos" style = "display: flex; gap: 5px">
+<img src="https://www.gosupps.com/media/catalog/product/8/1/81pguFaQJVL.jpg" width = "50px" height = "50px"/>
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmo59ohI7oLnTZ4bc-ZMInfriacEu-d39Oj3tAQhIR4g&s=10" width = "50px" height = "50px"/>
+</div>
+<c class="smallCap">HP: $hp</c>
+You enter the dungeon and it explains you must beat 18 floors to escape. You must also find a tutorial guild to be able to progress. As you wander, you encounter a horde of goblins with knives coming at you. 
+<div class = "mainImages" style = "display: flex; gap : 10px" >
+<img src = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvZeQs4RjNSrChGzkFwIwQ2V3jssLnBxT0Yd6GbJHljw&s=10" width = "400px" />
+</div>
+
+[[Run for your life]]
+[[Attack them! They're just little goblins!]]
+<audio src = "https://cdn.freesound.org/previews/521/521417_10962806-lq.mp3" autoplay />
+
+
+:: StoryStylesheet [stylesheet]
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Felipa&display=swap');
+
+tw-passage {
+  font-family: Audiowide;
+  font: white;
+  background : #454545;
+  
+}
+
+.smallCap {
+	font-size: 0.5em;
+}
+.centCap {
+  text-align: center;
+}
+.photos {
+  	display: flex;
+	margin-bottom: 5px;
+  	padding: 5px;
+  	justify-content: flex-end;
+}
+.mainImages {
+	display: flex;
+  	justify-content: center;
+}
